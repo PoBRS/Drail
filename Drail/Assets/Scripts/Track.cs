@@ -4,10 +4,14 @@ using System.Collections.Generic;
 
 public class Track : MonoBehaviour {
 
-	public BezierSpline linkedSpline = null;
+	public BezierSpline mainSpline = null;
+	public List<BezierSpline> splineList;
+	public GameObject railPrefab;
+
 	void Awake () 
 	{
 		GameElements.trackInstance = this;
+		this.splineList = new List<BezierSpline>();
 		this.InitialRailGeneration ();
 	}
 	
@@ -39,17 +43,61 @@ public class Track : MonoBehaviour {
 	
 	private void InitialRailGeneration()
 	{
-		linkedSpline.Reset ();
-		for(int i = 0; i < 8; i++)
+		mainSpline.Reset ();
+
+		for (int i = 0; i < 3; i++) 
 		{
-			linkedSpline.AddPoint();
+			GameObject rail = Instantiate (railPrefab);
+			splineList.Add (rail.GetComponent<BezierSpline>());
 		}
+
+		foreach(BezierSpline spline in splineList)
+		{
+			spline.Reset();
+		}
+
+		for(int i = 0; i < 10; i++)
+		{
+			AddNextPoint();
+		}
+	}
+
+	private void AddNextPoint()
+	{
+		mainSpline.AppendSpline(GameElements.prefabContainer.StraightRailPrefab.GetComponent<BezierSpline>());
+
+		foreach(BezierSpline spline in splineList)
+		{
+			spline.AppendSpline(GameElements.prefabContainer.StraightRailPrefab.GetComponent<BezierSpline>());
+
+
+			//spline.AddPoint();
+			//RailPoint point = spline.GetLastPoint ();
+			//GameObject newRail = GameObject.Instantiate (GameElements.prefabContainer.StraightRailPrefab);
+			//newRail.GetComponent<SplineDecorator> ().AddRailSection (point);
+			//point.linkedDecorator = newRail;
+		}
+		Vector3 spaceBetweenMainSpline = new Vector3(2,0,0);
+		splineList[0].GetLastPoint().pointCoordinates = mainSpline.GetLastPoint().pointCoordinates - spaceBetweenMainSpline;
+		splineList [1].GetLastPoint ().pointCoordinates = mainSpline.GetLastPoint ().pointCoordinates;
+		splineList[2].GetLastPoint().pointCoordinates = mainSpline.GetLastPoint().pointCoordinates + spaceBetweenMainSpline;
+	
+
 	}
 	
 	public void AutoGenerateNextRails()
 	{
-		linkedSpline.RemoveFirstPoint ();
-		linkedSpline.AddPoint ();
-		Debug.Log (linkedSpline.PointCount);
+				mainSpline.RemoveFirstPoint ();
+		mainSpline.GetFirstPoint().controlPoints.Remove(mainSpline.GetFirstPoint().controlPoints[0]);
+				foreach (BezierSpline spline in splineList) 
+				{
+					GameObject.Destroy (spline.GetFirstPoint ().linkedDecorator);
+					spline.RemoveFirstPoint ();
+
+				}
+
+			AddNextPoint ();
+
+		//Debug.Log (mainSpline.PointCount);
 	}
 }

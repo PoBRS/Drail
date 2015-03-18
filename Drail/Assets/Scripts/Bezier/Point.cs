@@ -1,63 +1,17 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
-public class Point 
+[System.Serializable]
+public class RailPoint : Point
 {
-	[SerializeField]
-	public Vector3 pointCoordinates;
-	
-	[SerializeField]
-	public Point NextPoint { get; set; }
-	[SerializeField]
-	public Point previousPoint;
 
+	[SerializeField]
+	public List<ControlPoint> controlPoints;
+
+	public GameObject linkedDecorator;
 	public bool isHole;
-	[SerializeField]
-	private ControlPoint controlPoint;
-	[SerializeField]
-	private ControlPoint secondaryControlPoint;
 
-	public Point PreviousPoint
-	{ 
-		get
-		{
-			return this.previousPoint;
-		}
-		set
-		{
-			this.previousPoint = value;
-			this.previousPoint.NextPoint = this;
-		}
-	}
-	
-	public ControlPoint ControlPoint
-	{
-		get
-		{
-			return this.controlPoint;
-		}
-		set
-		{
-			this.controlPoint = value;
-		}
-	}
-
-	public ControlPoint SecondaryControlPoint
-	{
-		get
-		{
-			return this.secondaryControlPoint;
-		}
-		set
-		{
-			this.secondaryControlPoint = value;
-		}
-	}
-
-	public Point(float x, float y, float z)
-	{
-		this.pointCoordinates = new Vector3 (x, y, z);
-	}
 
 	private BezierControlPointMode bezierControlPointMode;
 	
@@ -71,5 +25,39 @@ public class Point
 		{
 			bezierControlPointMode = value; 
 		}
+	}
+
+	public RailPoint (float x, float y, float z) : base(x,y,z)
+	{
+		this.controlPoints = new List<ControlPoint>();
+	}
+	
+	public RailPoint(Vector3 pointCoordinates) : base (pointCoordinates)
+	{
+		this.controlPoints = new List<ControlPoint>();
+	}
+
+	public void AddControlPoint(ControlPoint controlPointToAdd)
+	{
+		if (this.controlPoints.Count < 2) 
+		{
+			this.controlPoints.Add (controlPointToAdd);
+		}
+	}
+
+	public RailPoint DeepCopy()
+	{
+		RailPoint other = (RailPoint) this.MemberwiseClone();
+
+		List<ControlPoint> newControlPointList = new List<ControlPoint>();
+		foreach (ControlPoint controlPoint in this.controlPoints) 
+		{
+			ControlPoint newControlPoint = controlPoint.DeepCopy();
+			newControlPointList.Add(newControlPoint);
+		}
+		
+		other.controlPoints = newControlPointList;
+
+		return other;
 	}
 }

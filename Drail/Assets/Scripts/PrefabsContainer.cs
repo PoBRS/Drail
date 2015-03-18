@@ -2,9 +2,11 @@
 using System.Collections;
 
 public class PrefabsContainer : MonoBehaviour {
-	public GameObject controlPointPrefab;
+	public GameObject StraightRailPrefab;
+	public GameObject Left90RailPrefab;
+	public GameObject Right90RailPrefab;
 
-	void Start()
+	void Awake()
 	{
 		GameElements.prefabContainer = this;
 	}

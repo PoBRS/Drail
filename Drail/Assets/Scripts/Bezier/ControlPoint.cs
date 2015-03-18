@@ -1,15 +1,23 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+[System.Serializable]
 public class ControlPoint : Point
 {
-	[SerializeField][HideInInspector]
-	public Point LinkedPoint = null;
 
-	public ControlPoint(float x, float y, float z, Point linkedPoint) : base (x,y,z)
+	public ControlPoint(float x, float y, float z) : base (x,y,z)
 	{
-		this.pointCoordinates = new Vector3 (x, y, z);
-		this.LinkedPoint = linkedPoint;
 	}
+
+	public ControlPoint(Vector3 pointCoordinates) : base (pointCoordinates)
+	{
+	}
+	
+	public ControlPoint DeepCopy()
+	{
+		ControlPoint other = (ControlPoint) this.MemberwiseClone();
+		return other;
+	}
+
 	
 }

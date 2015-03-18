@@ -4,7 +4,8 @@ using System;
 
 public class BezierSpline : MonoBehaviour
 {
-    public Point[] bezierPoints;
+	[SerializeField]
+    public List<RailPoint> bezierPoints;
     /// <summary>
     /// Gives out the number of points in this BezierSpline.
     /// </summary>
@@ -12,7 +13,7 @@ public class BezierSpline : MonoBehaviour
     {
         get
         {
-            return (this.bezierPoints.Length);
+            return (this.bezierPoints.Count);
         }
     }
     /// <summary>
@@ -22,25 +23,29 @@ public class BezierSpline : MonoBehaviour
     /// <param name="newPosition"></param>
     public void SetControlPoint(Point pointToSet, Vector3 newPosition)
     {
-        Point pointToEnforce = null;
+        RailPoint pointToEnforce = null;
 
         if (pointToSet is ControlPoint)
         {
-            pointToEnforce = (pointToSet as ControlPoint).LinkedPoint;
+           // pointToEnforce = (pointToSet as ControlPoint).LinkedRailPoint;
         }
         else
         {
-            pointToEnforce = pointToSet;
+            pointToEnforce = (pointToSet as RailPoint);
             Vector3 delta = newPosition - pointToSet.pointCoordinates;
 
-            pointToSet.ControlPoint.pointCoordinates += delta;
-            if (pointToSet.SecondaryControlPoint != null)
+			(pointToSet as RailPoint).controlPoints[0].pointCoordinates += delta;
+			if ((pointToSet as RailPoint).controlPoints.Count > 2)
             {
-                pointToSet.SecondaryControlPoint.pointCoordinates += delta;
+				(pointToSet as RailPoint).controlPoints[1].pointCoordinates += delta;
             }
         }
+	
         pointToSet.pointCoordinates = newPosition;
-        EnforceMode(pointToEnforce, pointToSet);
+
+		if (pointToEnforce != null) {
+			EnforceMode (pointToEnforce, pointToSet);
+		}
     }
     /// <summary>
     /// Remove the oldest point from the array of points.
@@ -48,27 +53,21 @@ public class BezierSpline : MonoBehaviour
     /// </summary>
     public void RemoveFirstPoint()
     {
-        Point[] newPointsArray = new Point[bezierPoints.Length - 1];
-        for (int i = 1; i < bezierPoints.Length; i++)
-        {
-            newPointsArray[i - 1] = bezierPoints[i];
-        }
-        this.bezierPoints = newPointsArray;
+        if (bezierPoints.Count > 0) {
+			bezierPoints.Remove(bezierPoints[0]);
+		}
     }
     /// <summary>
     /// Return the oldest point from the array of points.
     /// It's the one in the first position
     /// </summary>
     /// <returns>The first point or NULL if there is no points.</returns>
-    public Point GetFirstPoint()
+    public RailPoint GetFirstPoint()
     {
-        if (bezierPoints != null)
+        if (bezierPoints.Count > 0)
         {
-            if (bezierPoints.Length > 0)
-            {
-                return bezierPoints[0];
-            }
-        }
+           return bezierPoints[0];
+                 }
         return null;
     }
     /// <summary>
@@ -76,13 +75,13 @@ public class BezierSpline : MonoBehaviour
     /// It's the one in the lst position.
     /// </summary>
     /// <returns>The last point or NULL if there is no points.</returns>
-    public Point GetLastPoint()
+    public RailPoint GetLastPoint()
     {
         if (bezierPoints != null)
         {
-            if (bezierPoints.Length > 0)
+            if (bezierPoints.Count > 0)
             {
-                return bezierPoints[bezierPoints.Length - 1];
+                return bezierPoints[bezierPoints.Count - 1];
             }
         }
         return null;
@@ -92,7 +91,7 @@ public class BezierSpline : MonoBehaviour
     /// </summary>
     /// <param name="pointToEnforce"></param>
     /// <param name="selectedPoint"></param>
-    private void EnforceMode(Point pointToEnforce, Point selectedPoint)
+    private void EnforceMode(RailPoint pointToEnforce, Point selectedPoint)
     {
         BezierControlPointMode mode;
 
@@ -107,11 +106,11 @@ public class BezierSpline : MonoBehaviour
         ControlPoint secondaryControlPoint = null;
         if (pointToEnforce != GetLastPoint())
         {
-            firstControlPoint = pointToEnforce.ControlPoint;
+			firstControlPoint = pointToEnforce.controlPoints[0];
         }
         if (pointToEnforce != GetFirstPoint())
         {
-            secondaryControlPoint = pointToEnforce.SecondaryControlPoint;
+			secondaryControlPoint = pointToEnforce.controlPoints[1];
         }
 
         if (selectedPoint == firstControlPoint)
@@ -153,21 +152,21 @@ public class BezierSpline : MonoBehaviour
             t -= i;
         }
 
-        if (bezierPoints[i].SecondaryControlPoint == null)
+        if (bezierPoints[i].controlPoints.Count == 2)
         {
-            return transform.TransformPoint(Bezier.GetPoint(bezierPoints[i].pointCoordinates,
-                                                            bezierPoints[i].ControlPoint.pointCoordinates,
-                                                            bezierPoints[i + 1].ControlPoint.pointCoordinates,
-                                                            bezierPoints[i + 1].pointCoordinates,
-                                                            t));
+			return transform.TransformPoint(Bezier.GetPoint(bezierPoints[i].pointCoordinates,
+			                                                bezierPoints[i].controlPoints[1].pointCoordinates,
+			                                                bezierPoints[i + 1].controlPoints[0].pointCoordinates,
+			                                                bezierPoints[i + 1].pointCoordinates,
+			                                                t));
         }
         else
         {
-            return transform.TransformPoint(Bezier.GetPoint(bezierPoints[i].pointCoordinates,
-                                                            bezierPoints[i].SecondaryControlPoint.pointCoordinates,
-                                                            bezierPoints[i + 1].ControlPoint.pointCoordinates,
-                                                            bezierPoints[i + 1].pointCoordinates,
-                                                            t));
+			return transform.TransformPoint(Bezier.GetPoint(bezierPoints[i].pointCoordinates,
+			                                                bezierPoints[i].controlPoints[0].pointCoordinates,
+			                                                bezierPoints[i + 1].controlPoints[0].pointCoordinates,
+			                                                bezierPoints[i + 1].pointCoordinates,
+			                                                t));
         }
     }
     /// <summary>
@@ -210,15 +209,15 @@ public class BezierSpline : MonoBehaviour
             i = (int)t;
             t -= i;
         }
-        if (bezierPoints[i].SecondaryControlPoint == null)
+        if (bezierPoints[i].controlPoints.Count < 2)
         {
             return transform.TransformPoint(Bezier.GetFirstDerivative(
-            bezierPoints[i].pointCoordinates, bezierPoints[i].ControlPoint.pointCoordinates, bezierPoints[i + 1].ControlPoint.pointCoordinates, bezierPoints[i + 1].pointCoordinates, t)) - transform.position;
+				bezierPoints[i].pointCoordinates, bezierPoints[i].controlPoints[0].pointCoordinates, bezierPoints[i + 1].controlPoints[0].pointCoordinates, bezierPoints[i + 1].pointCoordinates, t)) - transform.position;
         }
         else
         {
             return transform.TransformPoint(Bezier.GetFirstDerivative(
-            bezierPoints[i].pointCoordinates, bezierPoints[i].SecondaryControlPoint.pointCoordinates, bezierPoints[i + 1].ControlPoint.pointCoordinates, bezierPoints[i + 1].pointCoordinates, t)) - transform.position;
+				bezierPoints[i].pointCoordinates, bezierPoints[i].controlPoints[1].pointCoordinates, bezierPoints[i + 1].controlPoints[0].pointCoordinates, bezierPoints[i + 1].pointCoordinates, t)) - transform.position;
         }
     }
     /// <summary>
@@ -235,58 +234,49 @@ public class BezierSpline : MonoBehaviour
     /// </summary>
     public void Reset()
     {
-        bezierPoints = new Point[0];
-        AddPoint();
+		bezierPoints = new List<RailPoint>();
+		this.MakeStartingLine();
     }
+
+
+
+	private void MakeStartingLine()
+	{
+		AddPoint(new Vector3(0,0,0));
+		AddPoint(new Vector3(0,0,3));
+	}
     /// <summary>
     /// 
     /// </summary>
-    public void AddPoint()
+    public void AddPoint(Vector3 offset)
     {
-        List<Point> pointsToAdd = new List<Point>();
+        List<RailPoint> pointsToAdd = new List<RailPoint>();
 
-        Point newPoint = new Point(0f, 0f, 2f);
+        RailPoint newPoint = new RailPoint(offset);
+		Vector3 controlPointOffset = Vector3.zero;
+		RailPoint previousPoint = this.GetLastPoint();
 
-        if (this.bezierPoints.Length > 0)
-        {
-            Point previousPoint = GetLastPoint();
-            newPoint.pointCoordinates += previousPoint.pointCoordinates;
-            EnforceMode(newPoint, newPoint);
+		if (previousPoint != null) {
+			newPoint.pointCoordinates += previousPoint.pointCoordinates;
+			EnforceMode (newPoint, newPoint);
 
-            previousPoint.SecondaryControlPoint = new ControlPoint(0f, 0f, 1f, previousPoint);
-            previousPoint.SecondaryControlPoint.pointCoordinates += previousPoint.pointCoordinates;
-        }
-        else
-        {
-            Point initialisationPoint = new Point(0f, 0f, 0f);
-            initialisationPoint.ControlPoint = new ControlPoint(0f, 0f, 1f, initialisationPoint);
-            initialisationPoint.ControlPoint.pointCoordinates += initialisationPoint.pointCoordinates;
+			if (previousPoint != this.GetFirstPoint ()) {
+				ControlPoint controlPointToAddPrevious = new ControlPoint (new Vector3 (0f, 0f, 1f) + previousPoint.pointCoordinates);
+				previousPoint.AddControlPoint (controlPointToAddPrevious);
+			}
+		} else {
+			controlPointOffset = new Vector3(0,0,2);
+		}
+       
+		ControlPoint controlPointToAddCurrent = new ControlPoint(new Vector3(0f, 0f, -1f)  + newPoint.pointCoordinates + controlPointOffset);	
+		newPoint.AddControlPoint(controlPointToAddCurrent);
 
-            pointsToAdd.Add(initialisationPoint);
-        }
-
-        newPoint.ControlPoint = new ControlPoint(0f, 0f, -1f, newPoint);
-        newPoint.ControlPoint.pointCoordinates += newPoint.pointCoordinates;
 
         pointsToAdd.Add(newPoint);
 
-        foreach (Point points in pointsToAdd)
+        foreach (RailPoint points in pointsToAdd)
         {
-            if (PointCount > 0)
-            {
-                points.previousPoint = GetLastPoint();
-                GetLastPoint().NextPoint = points;
-            }
-
-            Point[] newPointsArray = new Point[bezierPoints.Length + 1];
-
-            for (int i = 0; i < bezierPoints.Length; i++)
-            {
-                newPointsArray[i] = bezierPoints[i];
-            }
-            newPointsArray[bezierPoints.Length] = points;
-
-            bezierPoints = newPointsArray;
+			bezierPoints.Add(points);
         }
 
         pointsToAdd.Clear();
@@ -313,10 +303,43 @@ public class BezierSpline : MonoBehaviour
     /// </summary>
     /// <param name="pointToSet"></param>
     /// <param name="newMode"></param>
-    public void SetControlPointMode(Point pointToSet, BezierControlPointMode newMode)
+    public void SetControlPointMode(RailPoint pointToSet, BezierControlPointMode newMode)
     {
 
         pointToSet.BezierControlPointMode = newMode;
         EnforceMode(pointToSet, pointToSet);
     }
+
+	public void AppendSpline(BezierSpline splineToAppend)
+	{
+		foreach(RailPoint point in splineToAppend.bezierPoints)
+		{
+			if(point == splineToAppend.GetFirstPoint())
+			{
+				RailPoint pointToAppend = point.DeepCopy();
+				Vector3 initialPointCoordinates = pointToAppend.pointCoordinates;
+
+				Vector3 deltaControlPoint = pointToAppend.controlPoints[pointToAppend.controlPoints.Count - 1].pointCoordinates - initialPointCoordinates;
+				pointToAppend.controlPoints[pointToAppend.controlPoints.Count - 1].pointCoordinates =this.GetLastPoint().pointCoordinates + deltaControlPoint;
+				this.GetLastPoint().controlPoints.Add(pointToAppend.controlPoints[pointToAppend.controlPoints.Count - 1]);
+			}
+			else
+			{
+				RailPoint pointToAppend = point.DeepCopy();
+
+				Vector3 initialPointCoordinates = pointToAppend.pointCoordinates;
+
+				pointToAppend.pointCoordinates += this.GetLastPoint().pointCoordinates;
+
+				foreach(ControlPoint controlPoint in pointToAppend.controlPoints)
+				{
+					Vector3 deltaControlPoint = controlPoint.pointCoordinates - initialPointCoordinates;
+					controlPoint.pointCoordinates = pointToAppend.pointCoordinates + deltaControlPoint;
+				}
+		
+				this.bezierPoints.Add(pointToAppend);
+			}
+		
+		}
+	}
 }
