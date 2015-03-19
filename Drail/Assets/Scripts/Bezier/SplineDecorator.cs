@@ -1,18 +1,11 @@
 ﻿using UnityEngine;
 
 public class SplineDecorator : MonoBehaviour {
-	
-	public BezierSpline spline;
-	
-	public int frequency;
-	
-	public bool lookForward;
-	
-	public GameObject Rail;
+
 
 	private void Awake () 
 	{
-		//GameElements.splineDecoratorInstance = this;
+		GameElements.splineDecoratorInstance = this;
 		//float stepSize = frequency;
 		//
 		//stepSize = 1f / (stepSize - 1);
@@ -33,52 +26,71 @@ public class SplineDecorator : MonoBehaviour {
 		//}
 	}
 
-	public void AddRailSection(RailPoint pointAdded)
+	public void AddRailSection(BezierSpline spline)
 	{
-		Vector3 pointCoordinates = pointAdded.pointCoordinates;
-		Vector3 previousPointCoordinates = Vector3.zero;
-
-		if (pointAdded != spline.GetFirstPoint() != null) 
-		{
-			//previousPointCoordinates = pointAdded.PreviousRailPoint.pointCoordinates;
-		}
-	
-		float m_Length = (pointCoordinates.z - previousPointCoordinates.z);
-		float m_Width = 1.0f;
-
+		Vector3 firstPointCoordinates = spline.GetFirstPoint ().pointCoordinates;
+		Vector3 previousSamplePoint = Vector3.zero;
+		Vector3 previousVectorX1 = Vector3.zero;
+		Vector3 previousVectorX2 = Vector3.zero;
 		MeshBuilder meshBuilder = new MeshBuilder ();
-		//Set up the vertices and triangles:
-		meshBuilder.Vertices.Add(new Vector3(previousPointCoordinates.x -0.5f, previousPointCoordinates.y, previousPointCoordinates.z));
-		meshBuilder.UVs.Add(new Vector2(0.0f, 0.0f));
-		meshBuilder.Normals.Add(Vector3.up);
-		
-		meshBuilder.Vertices.Add(new Vector3(pointCoordinates.x - 0.5f, pointCoordinates.y, pointCoordinates.z));
-		meshBuilder.UVs.Add(new Vector2(0.0f, 1.0f));
-		meshBuilder.Normals.Add(Vector3.up);
-		
-		meshBuilder.Vertices.Add(new Vector3(pointCoordinates.x + 0.5f, pointCoordinates.y, pointCoordinates.z));
-		meshBuilder.UVs.Add(new Vector2(1.0f, 1.0f));
-		meshBuilder.Normals.Add(Vector3.up);
-		
-		meshBuilder.Vertices.Add(new Vector3(previousPointCoordinates.x + 0.5f, previousPointCoordinates.y, previousPointCoordinates.z));
-		meshBuilder.UVs.Add(new Vector2(1.0f, 0.0f));
-		meshBuilder.Normals.Add(Vector3.up);
-		
-		meshBuilder.AddTriangle(0, 1, 2);
-		meshBuilder.AddTriangle(0, 2, 3);
-		
-		//Create the mesh:
-		MeshFilter filter = GetComponent<MeshFilter>();
-		
-		if (filter != null)
+
+		int trianglesIndexes = 0;
+
+		for (float pointInSpline = 0; pointInSpline < 1; pointInSpline += 0.001f) 
 		{
-			filter.sharedMesh = meshBuilder.CreateMesh();
+			Vector3 currentSamplePoint = spline.GetPoint (pointInSpline);
+	
+			//float m_Length = (pointCoordinates.z - previousPointCoordinates.z);
+			//float m_Width = 1.0f;
+
+				Vector3 perpendicularVector = Vector3.Cross(spline.GetDirection(pointInSpline), Vector3.up);
+				Vector3 clampedPerpendicularVector = Vector3.ClampMagnitude(perpendicularVector, 1);
+
+				Vector3 currentVectorX1 = new Vector3 (currentSamplePoint.x, currentSamplePoint.y, currentSamplePoint.z) + clampedPerpendicularVector;
+				Vector3 currentVectorX2 = new Vector3 (currentSamplePoint.x, currentSamplePoint.y, currentSamplePoint.z) - clampedPerpendicularVector;
+
+			if (currentSamplePoint != spline.GetPoint (0)) 
+			{
+				//Set up the vertices and triangles:
+				meshBuilder.Vertices.Add (previousVectorX1);
+				//meshBuilder.UVs.Add (new Vector2 (0.0f, 0.0f));
+				//meshBuilder.Normals.Add (Vector3.up);
+		
+				meshBuilder.Vertices.Add (currentVectorX1);
+				//meshBuilder.UVs.Add (new Vector2 (0.0f, 1.0f));
+				//meshBuilder.Normals.Add (Vector3.up);
+		
+				meshBuilder.Vertices.Add (currentVectorX2);
+				//meshBuilder.UVs.Add (new Vector2 (1.0f, 1.0f));
+				//meshBuilder.Normals.Add (Vector3.up);
+			
+				meshBuilder.Vertices.Add (previousVectorX2);
+				//meshBuilder.UVs.Add (new Vector2 (1.0f, 0.0f));
+				//meshBuilder.Normals.Add (Vector3.up);
+
+		
+				meshBuilder.AddTriangle (trianglesIndexes, trianglesIndexes + 1, trianglesIndexes + 2);
+				meshBuilder.AddTriangle (trianglesIndexes, trianglesIndexes + 2, trianglesIndexes + 3);
+
+				trianglesIndexes += 4;
+			}
+			previousVectorX1 = currentVectorX1;
+				previousVectorX2 = currentVectorX2;
+		
+
+			previousSamplePoint = currentSamplePoint;
 		}
-		Vector3 meshXPositionOffset = new Vector3 (0, 0, 0);
+			//Create the mesh:
+			MeshFilter filter = spline.gameObject.GetComponent<MeshFilter> ();
+		
+			if (filter != null) {
+				filter.sharedMesh = meshBuilder.CreateMesh ();
+			}
+			//Vector3 meshXPositionOffset = new Vector3 (0, 0, 0);
 
-		//this.transform.position = pointAdded.pointCoordinates - meshXPositionOffset;
+			//this.transform.position = pointAdded.pointCoordinates - meshXPositionOffset;
+		}
 
-	}
 
 
 }

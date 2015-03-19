@@ -10,8 +10,8 @@ GameObject:
   - 4: {fileID: 410158}
   - 114: {fileID: 11475244}
   - 114: {fileID: 11444520}
-  - 33: {fileID: 3395068}
-  - 23: {fileID: 2320202}
+  - 33: {fileID: 3320432}
+  - 23: {fileID: 2358058}
   m_Layer: 0
   m_Name: StraightRail 9
   m_TagString: Untagged
@@ -31,7 +31,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
---- !u!23 &2320202
+--- !u!23 &2358058
 MeshRenderer:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -41,7 +41,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_Materials:
-  - {fileID: 0}
+  - {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
   m_SubsetIndices: 
   m_StaticBatchRoot: {fileID: 0}
   m_UseLightProbes: 1
@@ -55,7 +55,7 @@ MeshRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingOrder: 0
---- !u!33 &3395068
+--- !u!33 &3320432
 MeshFilter:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -73,10 +73,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3286f5b12cfea04daca6e7fcb8f4dbc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spline: {fileID: 0}
-  frequency: 0
-  lookForward: 0
-  Rail: {fileID: 0}
 --- !u!114 &11475244
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -92,12 +88,12 @@ MonoBehaviour:
   - pointCoordinates: {x: 0, y: 0, z: 0}
     controlPoints:
     - pointCoordinates: {x: 0, y: 0, z: 1}
-    linkedDecorator: {fileID: 0}
+    linkedDecorator: {fileID: 100000, guid: 2e15dd8783c4c334083d586ee03f21ae, type: 2}
     isHole: 0
   - pointCoordinates: {x: 0, y: 0, z: 3}
     controlPoints:
     - pointCoordinates: {x: 0, y: 0, z: 2}
-    linkedDecorator: {fileID: 0}
+    linkedDecorator: {fileID: 100000, guid: 2e15dd8783c4c334083d586ee03f21ae, type: 2}
     isHole: 0
 --- !u!1001 &100100000
 Prefab:

@@ -69,35 +69,38 @@ public class Track : MonoBehaviour {
 		foreach(BezierSpline spline in splineList)
 		{
 			spline.AppendSpline(GameElements.prefabContainer.StraightRailPrefab.GetComponent<BezierSpline>());
-
-
+			GameElements.splineDecoratorInstance.AddRailSection (spline);
 			//spline.AddPoint();
-			//RailPoint point = spline.GetLastPoint ();
-			//GameObject newRail = GameObject.Instantiate (GameElements.prefabContainer.StraightRailPrefab);
-			//newRail.GetComponent<SplineDecorator> ().AddRailSection (point);
-			//point.linkedDecorator = newRail;
+
 		}
-		Vector3 spaceBetweenMainSpline = new Vector3(2,0,0);
+		Vector3 spaceBetweenMainSpline = new Vector3(4,0,0);
 		splineList[0].GetLastPoint().pointCoordinates = mainSpline.GetLastPoint().pointCoordinates - spaceBetweenMainSpline;
 		splineList [1].GetLastPoint ().pointCoordinates = mainSpline.GetLastPoint ().pointCoordinates;
 		splineList[2].GetLastPoint().pointCoordinates = mainSpline.GetLastPoint().pointCoordinates + spaceBetweenMainSpline;
 	
+
+		//RailPoint point = mainSpline.GetLastPoint ();
+		//GameObject newRail = GameObject.Instantiate (GameElements.prefabContainer.StraightRailPrefab);
+		//newRail.GetComponent<SplineDecorator> ().spline = spline;
+		//newRail.GetComponent<SplineDecorator> ().AddRailSection (mainSpline);
+		//point.linkedDecorator = newRail;
 
 	}
 	
 	public void AutoGenerateNextRails()
 	{
 				mainSpline.RemoveFirstPoint ();
-		mainSpline.GetFirstPoint().controlPoints.Remove(mainSpline.GetFirstPoint().controlPoints[0]);
+				mainSpline.GetFirstPoint().controlPoints.Remove(mainSpline.GetFirstPoint().controlPoints[0]);
 				foreach (BezierSpline spline in splineList) 
 				{
 					GameObject.Destroy (spline.GetFirstPoint ().linkedDecorator);
 					spline.RemoveFirstPoint ();
-
+					spline.GetFirstPoint().controlPoints.Remove(spline.GetFirstPoint().controlPoints[0]);
 				}
 
+			if (mainSpline.PointCount < ((10 * 2) - 2)) {
 			AddNextPoint ();
-
+		}
 		//Debug.Log (mainSpline.PointCount);
 	}
 }
