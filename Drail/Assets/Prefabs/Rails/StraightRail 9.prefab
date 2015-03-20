@@ -41,7 +41,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_Materials:
-  - {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: a098971f65f74564d9609d67e24fc93d, type: 2}
   m_SubsetIndices: 
   m_StaticBatchRoot: {fileID: 0}
   m_UseLightProbes: 1
@@ -90,10 +90,22 @@ MonoBehaviour:
     - pointCoordinates: {x: 0, y: 0, z: 1}
     linkedDecorator: {fileID: 100000, guid: 2e15dd8783c4c334083d586ee03f21ae, type: 2}
     isHole: 0
-  - pointCoordinates: {x: 0, y: 0, z: 3}
+  - pointCoordinates: {x: -1.06829011, y: 0, z: 2}
     controlPoints:
-    - pointCoordinates: {x: 0, y: 0, z: 2}
+    - pointCoordinates: {x: -1.06829011, y: 0, z: .850281477}
+    - pointCoordinates: {x: -1.06829011, y: 0, z: 3}
     linkedDecorator: {fileID: 100000, guid: 2e15dd8783c4c334083d586ee03f21ae, type: 2}
+    isHole: 0
+  - pointCoordinates: {x: 1.21324694, y: 2.67844677, z: 5.06689644}
+    controlPoints:
+    - pointCoordinates: {x: 3.49478388, y: 2.67844677, z: 4.13379288}
+    - pointCoordinates: {x: -1.06829011, y: 2.67844677, z: 6}
+    linkedDecorator: {fileID: 0}
+    isHole: 0
+  - pointCoordinates: {x: -1.06829011, y: 2.67844677, z: 8}
+    controlPoints:
+    - pointCoordinates: {x: -1.06829011, y: 2.67844677, z: 7}
+    linkedDecorator: {fileID: 0}
     isHole: 0
 --- !u!1001 &100100000
 Prefab:

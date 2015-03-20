@@ -93,7 +93,7 @@ public class Track : MonoBehaviour {
 				mainSpline.GetFirstPoint().controlPoints.Remove(mainSpline.GetFirstPoint().controlPoints[0]);
 				foreach (BezierSpline spline in splineList) 
 				{
-					GameObject.Destroy (spline.GetFirstPoint ().linkedDecorator);
+//					GameObject.Destroy (spline.GetFirstPoint ().linkedDecorator);
 					spline.RemoveFirstPoint ();
 					spline.GetFirstPoint().controlPoints.Remove(spline.GetFirstPoint().controlPoints[0]);
 				}

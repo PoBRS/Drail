@@ -34,6 +34,7 @@ public class SplineDecorator : MonoBehaviour {
 		Vector3 previousVectorX2 = Vector3.zero;
 		MeshBuilder meshBuilder = new MeshBuilder ();
 
+		float uvIndex = 0.0f;
 		int trianglesIndexes = 0;
 
 		for (float pointInSpline = 0; pointInSpline < 1; pointInSpline += 0.001f) 
@@ -53,19 +54,19 @@ public class SplineDecorator : MonoBehaviour {
 			{
 				//Set up the vertices and triangles:
 				meshBuilder.Vertices.Add (previousVectorX1);
-				//meshBuilder.UVs.Add (new Vector2 (0.0f, 0.0f));
+				meshBuilder.UVs.Add (new Vector2 (uvIndex, uvIndex));
 				//meshBuilder.Normals.Add (Vector3.up);
 		
 				meshBuilder.Vertices.Add (currentVectorX1);
-				//meshBuilder.UVs.Add (new Vector2 (0.0f, 1.0f));
+				meshBuilder.UVs.Add (new Vector2 (uvIndex, uvIndex+1));
 				//meshBuilder.Normals.Add (Vector3.up);
 		
 				meshBuilder.Vertices.Add (currentVectorX2);
-				//meshBuilder.UVs.Add (new Vector2 (1.0f, 1.0f));
+				meshBuilder.UVs.Add (new Vector2 (uvIndex+1, uvIndex+1));
 				//meshBuilder.Normals.Add (Vector3.up);
 			
 				meshBuilder.Vertices.Add (previousVectorX2);
-				//meshBuilder.UVs.Add (new Vector2 (1.0f, 0.0f));
+				meshBuilder.UVs.Add (new Vector2 (uvIndex+1, uvIndex));
 				//meshBuilder.Normals.Add (Vector3.up);
 
 		
@@ -73,6 +74,7 @@ public class SplineDecorator : MonoBehaviour {
 				meshBuilder.AddTriangle (trianglesIndexes, trianglesIndexes + 2, trianglesIndexes + 3);
 
 				trianglesIndexes += 4;
+				uvIndex++;
 			}
 			previousVectorX1 = currentVectorX1;
 				previousVectorX2 = currentVectorX2;
@@ -86,6 +88,14 @@ public class SplineDecorator : MonoBehaviour {
 			if (filter != null) {
 				filter.sharedMesh = meshBuilder.CreateMesh ();
 			}
+			Mesh myMesh = GetComponent<MeshFilter>().mesh;
+			Vector2[] uvs = myMesh.uv;
+			for(int i  = 0; i < uvs.Length; i++)
+			{
+				uvs[i].Scale(transform.localScale);
+			}
+		
+			myMesh.uv = uvs;
 			//Vector3 meshXPositionOffset = new Vector3 (0, 0, 0);
 
 			//this.transform.position = pointAdded.pointCoordinates - meshXPositionOffset;
